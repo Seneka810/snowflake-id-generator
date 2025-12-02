@@ -3,9 +3,21 @@ kind: Pod
 metadata:
   name: kuard
 spec:
+  automountServiceAccountToken: false
   containers:
   - image: jmutai/kuard-amd64:blue
     name: kuard
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
+        ephemeral-storage: "1Gi"
+      limits:
+        memory: "512Mi"
+    ports:
+      - containerPort: 8080
+        name: http
+        protocol: TCP
     livenessProbe:
       httpGet:
         path: /healthy
@@ -23,7 +35,3 @@ spec:
       periodSeconds: 5
       failureThreshold: 3
       successThreshold: 1
-    ports:
-    - containerPort: 8080
-      name: http
-      protocol: TCP
