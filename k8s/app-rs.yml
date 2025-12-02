@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: kuard-replicaset
+  name: snowflake-replicaset
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: kuard
+      app: snowflake
   template:
       metadata:
         labels:
-          app: kuard
+          app: snowflake
       spec:
         automountServiceAccountToken: false
         containers:
-          - name: kuard
-            image: jmutai/kuard-amd64:blue
+          - name: snowflake-id-generator
+            image: seneka810/snowflake-id-generator:v1
             resources:
               requests:
                 cpu: "250m"
@@ -29,7 +29,7 @@ spec:
                 protocol: TCP
             livenessProbe:
               httpGet:
-                path: /healthy
+                path: /management/health/livenessState
                 port: 8080
               initialDelaySeconds: 15
               timeoutSeconds: 2
@@ -37,7 +37,7 @@ spec:
               failureThreshold: 3
             readinessProbe:
               httpGet:
-                path: /ready
+                path: /management/health/readinessState
                 port: 8080
               initialDelaySeconds: 5
               timeoutSeconds: 1
