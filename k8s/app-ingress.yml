@@ -2,9 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: snowflake-ingress
-  annotations:
-    spec.ingressClassName: contour
 spec:
+  ingressClassName: contour
   rules:
   - host: snowflake.dev.local
     http:
