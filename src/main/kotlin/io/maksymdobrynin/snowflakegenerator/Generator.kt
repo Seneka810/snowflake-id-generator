@@ -4,6 +4,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
+import org.slf4j.LoggerFactory
+import org.slf4j.Logger
+
 import org.springframework.stereotype.Service
 
 @Service
@@ -46,6 +49,7 @@ class Generator(
 	 */
 	private val lock = Mutex()
 	private var lastTimestamp = 0L
+	private val logger: Logger = LoggerFactory.getLogger(Generator::class.java)
 
 	init {
 		require(settings.startingEpoch >= 0 && settings.startingEpoch <= Long.MAX_VALUE) {
@@ -77,6 +81,12 @@ class Generator(
 	suspend fun nextId(): Long =
 		lock.withLock {
 			var timestamp = settings.nextTimeSeed.invoke()
+
+			logger.info(
+				"nextId start: lastTimestamp={}, currentTimestamp={}, datacenterId={}, workerId={}, sequence={}",
+				lastTimestamp, timestamp, settings.datacenterId, settings.workedId, settings.sequence
+			)
+
 
 			if (lastTimestamp == timestamp) {
 				settings.sequence = (settings.sequence + 1) and maxSequence

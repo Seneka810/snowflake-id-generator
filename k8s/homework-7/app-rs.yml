@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: snowflake-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: snowflake
+  template:
+      metadata:
+        labels:
+          app: snowflake
+      spec:
+        automountServiceAccountToken: false
+        containers:
+          - name: snowflake-id-generator
+            image: seneka810/snowflake-id-generator:v2
+            env:
+              - name: SNOWFLAKE_SETTINGS_DATACENTER_ID
+                valueFrom:
+                  configMapKeyRef:
+                    name: snowflake-config
+                    key: SNOWFLAKE_SETTINGS_DATACENTER_ID
+              - name: SNOWFLAKE_SETTINGS_STARTING_EPOCH
+                valueFrom:
+                  configMapKeyRef:
+                    name: snowflake-config
+                    key: SNOWFLAKE_SETTINGS_STARTING_EPOCH
+              - name: SPRING_APPLICATION_NAME
+                valueFrom:
+                  configMapKeyRef:
+                    name: snowflake-config
+                    key: SPRING_APPLICATION_NAME
+            volumeMounts:
+              - name: snowflake-config-volume
+                mountPath: /app/config
+            resources:
+              requests:
+                cpu: "250m"
+                memory: "256Mi"
+                ephemeral-storage: "1Gi"
+              limits:
+                memory: "512Mi"
+            ports:
+              - containerPort: 8080
+                name: http
+                protocol: TCP
+            livenessProbe:
+              httpGet:
+                path: /management/health/livenessState
+                port: 8080
+              initialDelaySeconds: 15
+              timeoutSeconds: 2
+              periodSeconds: 20
+              failureThreshold: 3
+            readinessProbe:
+              httpGet:
+                path: /management/health/readinessState
+                port: 8080
+              initialDelaySeconds: 5
+              timeoutSeconds: 1
+              periodSeconds: 5
+              failureThreshold: 3
+              successThreshold: 1
+        volumes:
+          - name: snowflake-config-volume
+            configMap:
+              name: snowflake-config
