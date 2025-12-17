@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snowflake-config
+data:
+  SPRING_APPLICATION_NAME: "snowflake"
+  SNOWFLAKE_SETTINGS_STARTING_EPOCH: "1735689600000"
+  SNOWFLAKE_SETTINGS_DATACENTER_ID: "11"
